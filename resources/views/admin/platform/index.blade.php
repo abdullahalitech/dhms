@@ -194,7 +194,7 @@
             ],
             bLengthChange: false,
             searching: true,
-            bPaginate: false,
+            bPaginate: true,
             language: { search: "", searchPlaceholder: "Search platform" }
         });
 

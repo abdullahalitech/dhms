@@ -35,7 +35,7 @@
                                             <th>Department</th>
                                             <th>Status</th>
                                             <th>Created Date</th>
-                                            <th style="width:16% !important;">Actions</th>
+                                            <th style="width:20% !important;">Actions</th>
                                         </tr>
                                     </thead>
                                     

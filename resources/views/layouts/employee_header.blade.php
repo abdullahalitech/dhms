@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
 
-    <title>Admin - Dashboard</title>
+    <title>Employee - Dashboard</title>
 
     <!-- Custom fonts for this template-->
     <link href="{{url('template/vendor/fontawesome-free/css/all.min.css')}}" rel="stylesheet" type="text/css">
@@ -34,6 +34,10 @@
     <style>
         .w-150{
             width:150px!important;
+        }
+
+        .w-125{
+            width:125px!important;
         }
 
         .parsley-errors-list {
@@ -85,7 +89,16 @@
             border-radius:5px !important;
             border:1px solid #eee !important;
         }
+        .custom-nav-link:hover{
+            color:#fff !important
+        }
+        .active{
+            color:#fff !important;
+        }
 
+        .datepicker-grid {
+            color:#000;
+        }
         .dataTables_paginate {
             text-align: center;
         }
@@ -102,19 +115,21 @@
         }
 
         .paginate_button:hover {
-            background-color: #4e73df;
+            background-color: #24b3fd;
             color: #fff;
-            border-color: #4e73df;
+            border-color: #24b3fd;
         }
 
         .current {
-            background-color: #4e73df;
+            background-color: #24b3fd;
             color: #fff;
-            border-color: #4e73df;
+            border-color: #24b3fd;
         }
+
         .table-responsive::-webkit-scrollbar {
             display: none;
         }
+
     </style>
 
 </head>
@@ -124,69 +139,7 @@
     <!-- Page Wrapper -->
     <div id="wrapper">
 
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center " href="{{url('admin/dashboard')}}">
-                <!-- <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div> -->
-                <div class="sidebar-brand-text mx-3"> <img src="{{url('images/logo.png')}}"  class="w-150"/></div>
-            </a>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
-
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'adminDashboard' ) active @endif">
-                <a class="nav-link" href="{{url('admin/dashboard')}}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>Dashboard</span></a>
-            </li>
-
-            <!-- Divider -->
-            <hr class="sidebar-divider">
-
-            <!-- Heading -->
-            <div class="sidebar-heading">
-                Management
-            </div>
-
-            <!-- Nav Item - Pages Collapse Menu -->
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'employee' ) active @endif">
-                <a class="nav-link" href="{{url('employee')}}">
-                    <i class="fas fa-fw fa-user"></i>
-                    <span>Employees</span></a>
-            </li>
-
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'platform' ) active @endif">
-                <a class="nav-link" href="{{url('platform')}}">
-                    <i class="fas fa-fw fa-desktop"></i>
-                    <span>Platforms</span></a>
-            </li>
-
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'project' ) active @endif">
-                <a class="nav-link" href="{{url('projects/all')}}">
-                    <i class="fas fa-fw fa-file"></i>
-                    <span>Projects</span></a>
-            </li>
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'bid' || @if( Route::getCurrentRoute()->getName() == 'invite') active @endif">
-                <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
-                    aria-expanded="true" aria-controls="collapseTwo">
-                    <i class="fas fa-fw fa-percent"></i>
-                    <span>Commissions</span>
-                </a>
-                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
-                    <div class="bg-white py-2 collapse-inner rounded">
-                        <a class="collapse-item" href="{{url('bid')}}">Bid</a>
-                        <a class="collapse-item" href="{{url('invite')}}">Invite</a>
-                    </div>
-                </div>
-            </li>
-
-        </ul>
-        <!-- End of Sidebar -->
+       
 
         <!-- Content Wrapper -->
         <div id="content-wrapper" class="d-flex flex-column">
@@ -195,7 +148,7 @@
             <div id="content">
 
                 <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+                <nav class="navbar navbar-expand navbar-light bg-primary text-white topbar mb-4 static-top shadow">
 
                     <!-- Sidebar Toggle (Topbar) -->
                     <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
@@ -215,11 +168,33 @@
                             </div>
                         </div>
                     </form> -->
-                    <h4 class="m-0 font-weight-bold text-primary">{{$title}}</h4>
+                    <a class="sidebar-brand d-flex align-items-center " href="{{url('user/dashboard')}}">
+                        <!-- <div class="sidebar-brand-icon rotate-n-15">
+                            <i class="fas fa-laugh-wink"></i>
+                        </div> -->
+                        <div class="sidebar-brand-text mx-3"> <img src="{{url('images/logo.png')}}"  class="w-125"/></div>
+                    </a>
 
                     <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
+                    <ul class="navbar-nav mx-auto w-100 d-flex justify-content-center">
+                        <li class="nav-item ">
+                            <a class="nav-link custom-nav-link @if( Route::getCurrentRoute()->getName() == 'employeeDashboard' ) active @endif" href="{{url('user/dashboard')}}">
+                                
+                                <span>Dashboard</span></a>
+                        </li>
 
+                        <!-- Nav Item - Pages Collapse Menu -->
+                        <li class="nav-item ">
+                            <a class="nav-link custom-nav-link @if( Route::getCurrentRoute()->getName() == 'userProject' ) active @endif" href="{{url('user/projects')}}">
+                                
+                                <span>My Projects</span></a>
+                        </li>
+
+                        <li class="nav-item ">
+                            <a class="nav-link custom-nav-link @if( Route::getCurrentRoute()->getName() == 'platform' ) active @endif" href="{{url('user/projects/shared')}}">
+                                
+                                <span>Shared Projects</span></a>
+                        </li>
                         <!-- Nav Item - Search Dropdown (Visible Only XS) -->
                         <li class="nav-item dropdown no-arrow d-sm-none">
                             <a class="nav-link dropdown-toggle" href="#" id="searchDropdown" role="button"
@@ -245,13 +220,18 @@
                         </li>
 
                         
-                        <div class="topbar-divider d-none d-sm-block"></div>
+                        
 
-                        <!-- Nav Item - User Information -->
+                    
+                    </ul>
+
+                    <ul class="navbar-nav ml-auto">
+                        <div class="topbar-divider d-none d-sm-block"></div>
+                            <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span class="mr-2 d-none d-lg-inline text-gray-600 small">{{Auth::user()->name}}</span>
+                                <span class="mr-2 d-none d-lg-inline text-white small">{{Auth::user()->name}}</span>
                                 <img class="img-profile rounded-circle"
                                     src="{{url('template/img/undraw_profile.svg')}}">
                             </a>

@@ -1,4 +1,4 @@
-@include('layouts.admin_header')
+@include('layouts.employee_header')
 <style>
 .codex-editor.codex-editor--narrow::-webkit-scrollbar {
     display: none;
@@ -7,6 +7,10 @@
         <!-- Begin Page Content -->
         <div class="container-fluid">
             <!-- Content Row -->
+            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                <h1 class="h3 mb-0 text-gray-800">{{$title}}</h1>
+                
+            </div>
             <div class="row">
 
                 <div class="col-12">
@@ -242,7 +246,7 @@
         </div>
     </div> 
 
-    @include('layouts.admin_footer')
+    @include('layouts.employee_footer')
     <script>
         $(document).ready(function() {
             // $('#platform').select2({
@@ -405,11 +409,10 @@
         toastr.options.timeOut = 1500; // 1.5s
         projectTbl = $('#project-table').dataTable({
             ajax: {
-                url: "{{ url('ajax/get-project') }}",
+                url: "{{ url('user/ajax/get-project') }}",
                 type: "POST",
                 data: {
-                    _token: "{{ @csrf_token() }}",
-                    id:"{{$id}}"
+                    _token: "{{ @csrf_token() }}"
                 },
             },
             processing: true,
@@ -428,12 +431,11 @@
         $('#project-table').DataTable().destroy();
         projectTbl = $('#project-table').dataTable({
             ajax: {
-                url: "{{ url('ajax/get-project') }}",
+                url: "{{ url('user/ajax/get-project') }}",
                 type: "POST",
                 data: {
                     _token: "{{ @csrf_token() }}",
-                    search:search,
-                    id:"{{$id}}"
+                    search:search
                 },
             },
             processing: true,
@@ -511,7 +513,7 @@
             var description         = savedData.blocks;
             var description_html    = convertDataToHtml(savedData.blocks);      
             $.ajax({
-                url: "{{ url('add-project') }}",
+                url: "{{ url('user/add-project') }}",
                 method: "POST",
                 data: { 
                     _token: "{{ @csrf_token() }}", 	
@@ -545,103 +547,6 @@
             
         })
     })
-
-
-    $(document).on('click', '.edit-user', function() {
-
-        var user_id = $(this).attr('data-id');
-        $('.update-user').attr('data-id', user_id);
-
-        $.ajax({
-            url: "{{ url('ajax/admin/get-employee-for-edit') }}",
-            type: "POST",
-            data: { _token: "{{ @csrf_token() }}", user_id: user_id },
-            success: function(data) {
-                var d = $.parseJSON( data );
-                console.log( data );
-                $('.editName').val( d.name );
-                $('.editPhone').val(d.phone);
-                $('.editPassword').val('');
-                $('.editDepartment').val(d.roles).change();
-                $('#userEditModal').modal('show');
-            }   
-        });
-
-    });
-
-    $(document).on('click', '.update-user', function(){
-        $(document).find('#edit-form-employee').parsley().whenValidate({
-            group: 'block-2'
-        }).done(function(){
-            var id          = $('.update-user').attr('data-id');
-			var name 		= $('.editName').val();
-			var password    = $('.editPassword').val();
-			var phone 		= $('.editPhone').val();
-			var department 		= $('.editDepartment').val();
-			
-			$.ajax({
-                url: "{{ url('update-employee') }}",
-                method: "POST",
-                data: { 
-                    _token: "{{ @csrf_token() }}", 	
-					name 	 :name, 	
-					password :password, 	
-					phone    :phone,
-					department :department,
-                    id:id
-                },
-                success: function(data) {
-                    var d = $.parseJSON( data );
-
-                    if( d.success == 1 ) {
-                        projectTbl.api().ajax.reload();
-                        $('#userEditModal').modal('hide');
-						toastr.success('Updated Successfuly!');
-                    } else {
-                       
-					 
-					   
-                    }
-                }
-            });
-        })
-    })
-
-    $(document).on('click', '.suspend-user', function() {
-
-        
-        var user_id = $(this).attr('data-id');
-        $('#final-suspend-user').attr('data-id', user_id);
-        $('#suspendUserModal').modal("show");
-
-    });
-
-    $(document).on('click', '#final-suspend-user', function() {
-        var user_id = $(this).attr('data-id');
-        $.ajax({
-            url: "{{ url('ajax/admin/suspend-user') }}",
-            type: "POST",
-            data: { _token: "{{ @csrf_token() }}", user_id: user_id},
-            success: function(data) {
-                projectTbl.api().ajax.reload();
-                $('#suspendUserModal').modal("hide");
-                toastr.success('Suspended Successfuly!');
-            }
-        });
-    });
-
-    $(document).on('click', '.resume-user', function() {        
-        var user_id = $(this).attr('data-id');
-        $.ajax({
-            url: "{{ url('ajax/admin/resume-user') }}",
-            type: "POST",
-            data: { _token: "{{ @csrf_token() }}", user_id: user_id},
-            success: function(data) {
-                projectTbl.api().ajax.reload();
-                toastr.success('Resumed Successfuly!');
-            }
-        });
-    });
 
     function convertDataToHtml(blocks) {
       var convertedHtml = "";

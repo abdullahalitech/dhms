@@ -3,6 +3,9 @@
 .codex-editor.codex-editor--narrow::-webkit-scrollbar {
     display: none;
 }
+.datepicker {
+    z-index: 1600 !important; /* has to be larger than 1050 */
+}
 </style>
         <!-- Begin Page Content -->
         <div class="container-fluid">
@@ -14,37 +17,26 @@
                         
                         <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-12 col-md-10">
-                                    <a href="#" class="btn btn-primary" data-toggle="modal" data-target="#AddModal">
-                                        Add Project
-                                    </a>
+                                <div class="col-12 col-md-12">
+                                    {!!$element!!}
                                 </div>
-                                <div class="col-12 col-md-2 mb-2">
-                                    <div class="text-end">
-                                        <select id="platform-select" name="platform-select" class="platform-select form-select form-control">
-                                            <option value="" selected="">Select Platform</option>
-                                            <option value="1" >Fiver</option>
-                                            <option value="2">Upwork</option>
-                                            <option value="3">Direct</option>
-                                            <option value="4">CV Marketing</option>
-                                        </select>
+                                <div class="col-12 col-md-9 px-4">
+                                    <h4 class="mb-2 font-weight-bold text-dark border-bottom border-light pb-2">Project Details</h4>
+                                    {!!$project->description_html!!}
+                                </div>
+
+                                <div class="col-12 col-md-3 mb-4">
+
+                                    <!-- Illustrations -->
+                                    <div class="card shadow mb-4">
+                                        <div class="card-header py-3">
+                                            <h6 class="m-0 font-weight-bold text-primary">Important Info</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            {!!$modal_ele!!}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-
-                            
-                            <div class="table-responsive">
-                                <table class="table border-0" id="project-table" width="100%" cellspacing="0">
-                                    <thead class="d-none">
-                                        <tr>
-                                            <th>Project</th>
-                                        </tr>
-                                    </thead>
-                                    
-                                    <tbody>
-                                        
-                                    </tbody>
-                                </table>
                             </div>
                         </div>
                     </div>
@@ -57,12 +49,12 @@
 
            
     <!-- Add Modal-->
-    <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    <div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Add Project</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Project</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
@@ -91,26 +83,26 @@
                             
                             <div class="col-12 col-md-6  mb-2">
                                 <label for="title" class="fs-6 text-secondary">Title</label>
-                                <input type="text" name="title"  class="title form-control" required="" data-parsley-group="block-1">
+                                <input type="text" name="title"  class="title form-control" value="{{$project->title}}" required="" data-parsley-group="block-1">
                             </div>
                             <div class="col-12 col-md-6  mb-2">
                                 <label for="client_name" class="fs-6 text-secondary">Client Name</label>
-                                <input type="text" name="client_name"  class="client_name form-control" required="" data-parsley-group="block-1">
+                                <input type="text" name="client_name"  class="client_name form-control" value="{{$project->client_name}}" required="" data-parsley-group="block-1">
                             </div>
                             <div class="col-12 col-md-6 mb-2">
                                 <label for="client_email" class="fs-6 text-secondary">Client Email</label>
-                                <input type="email" name="client_email" class="client_email form-control" required="" data-parsley-group="block-1">
+                                <input type="email" name="client_email" class="client_email form-control" value="{{$project->client_email}}" required="" data-parsley-group="block-1">
                             </div>
                             <div class="col-12 col-md-6  mb-2">
                                 <label for="amount" class="fs-6 text-secondary">Total Amount</label>
-                                <input type="text" name="amount"  class="amount form-control" required="" data-parsley-group="block-1" data-parsley-type="number">
+                                <input type="text" name="amount"  class="amount form-control" required="" value="{{$project->total_amount}}" data-parsley-group="block-1" data-parsley-type="number">
                             </div>
                             <div class="col-12 col-md-6 mb-2">
                                 <label for="platform" class="fs-6 text-secondary">Type</label>
                                 <select id="platform" name="platform" class="platform form-select form-control" required="" data-parsley-group="block-1">
                                     <option value="" selected="">Select</option>
-                                    @foreach($platform as $p)
-                                        <option data-com="{{$p->commission}}" value="{{$p->id}}" >{{$p->name}}
+                                    @foreach($all_platform as $p)
+                                        <option data-com="{{$p->commission}}" value="{{$p->id}}" <?php if($project->platform_id == $p->id){ echo 'selected'; } ?>>{{$p->name}}
                                         @if($p->type == 1)
                                             (Fiver)
                                         @elseif($p->type == 2)
@@ -174,86 +166,142 @@
         </div>
     </div>
 
-    <!-- Edit Modal-->
-    <div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+     <!-- Deadline Modal-->
+     <div class="modal fade" id="deadlineModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Edit Employee</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Deadline</h5>
                     <button class="close" type="button" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
-                <form id="edit-form-employee" class="edit-form-employee" novalidate data-parsley-validate>
-                    <div class="modal-body"> 
-                        <div class="row">
-                            
-                            <div class="col-12 col-md-12  mb-2">
-                                <label for="eName" class="fs-6 text-secondary">Name</label>
-                                <input type="text" name="eName"  class="editName form-control" required="" data-parsley-group="block-2">
-                            </div>
-                            <div class="col-12 col-md-12 mb-2">
-                                <label for="editPassword" class="fs-6 text-secondary">Password</label>
-                                <input type="editPassword" name="editPassword" class="editPassword form-control">
-                            </div>
-                            <div class="col-12 col-md-12 mb-2">
-                                <label for="editPhone" class="fs-6 text-secondary">Phone</label>
-                                <input type="tel" name="editPhone" class="editPhone form-control" required="" data-parsley-group="block-2">
-                            </div>
-                            <div class="col-12 col-md-12 mb-2">
-                                <label for="editDepartment" class="fs-6 text-secondary">Department</label>
-                                <select id="editDepartment" name="editDepartment" class="editDepartment form-select form-control" required="" data-parsley-group="block-2">
-                                <option value="">Select</option>
-                                <option value="2" >Business Developer</option>
-                                <option value="3">Developer</option>
-                                <option value="4">Other</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="m">
+                <div class="modal-body">
+                    <label for="eName" class="fs-6 text-secondary">Set the deadline for meeting the client's requirement on time</label>
+                    <div id="inline" data-date="01/05/2020"></div>
+                    <input type="text" name="datepicker" id="deadline" class="form-control">
+                </div>
+                
+                <div class="col-12 text-end mb-4">
+                    <div class="d-flex justify-content-end align-items-center">
                         <button class="btn btn-secondary btn-sm" type="button">Cancel</button>
-                        <button type="button" class="btn btn-primary update-user btn-sm">Update</button>
+                        <button type="button" class="btn btn-primary update-deadline-btn btn-sm mx-2">Update</button>
                     </div>
-                </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Modal-->
+    <div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Assign User</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 col-md-12 mb-2">
+                        <label for="assign_user" class="fs-6 text-secondary">Select the business developer</label>
+                        <select id="assign_user" name="assign_user" class="assign_user form-select form-control" required="" data-parsley-group="block-3">
+                        <option value="">Select</option>
+
+                        @foreach($bd_users as $bd)
+                            <option value="{{$bd->id}}" <?php if($project->owner == $bd->id){ echo 'selected'; } ?>>{{$bd->name}}</option>
+                        @endforeach
+                        
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-12 text-end mb-4">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <button class="btn btn-secondary btn-sm" type="button">Cancel</button>
+                        <button type="button" class="btn btn-primary update-assign-btn btn-sm mx-2">Update</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+     <!-- Share Modal-->
+     <div class="modal fade" id="shareModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Shared User</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="col-12 col-md-12 mb-2">
+                        <label for="shared_user" class="fs-6 text-secondary">Project will be manage by</label>
+                        <select id="shared_user" name="shared_user" class="shared_user form-select form-control" required="" data-parsley-group="block-3">
+                        <option value="">Select</option>
+
+                        @foreach($s_users as $s)
+                            <option value="{{$s->id}}" <?php if($project->shared_user == $s->id){ echo 'selected'; } ?>>{{$s->name}}</option>
+                        @endforeach
+                        
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="col-12 text-end mb-4">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <button class="btn btn-secondary btn-sm" type="button">Cancel</button>
+                        <button type="button" class="btn btn-primary update-shared-btn btn-sm mx-2">Update</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- suspend modal -->
-    <div class="modal fade" id="suspendUserModal" tabindex="-1" role="dialog" aria-labelledby="suspendUserModalLabel" aria-hidden="true">
+    <div class="modal fade" id="completeModal" tabindex="-1" role="dialog" aria-labelledby="completeModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Suspend User</h5>
+                    <h5 class="modal-title" id="exampleModalLabel">Mark Complete</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <p class="text-danger">User access will be blocked from all features of this system are you sure to suspend this user?</p>
+                    <p class="text-success">Great job on completing the task! Your hard work and dedication are truly appreciated.</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="final-suspend-user">Yes</button>
+                    <button type="button" class="btn btn-primary" id="final-complete">Mark Complete</button>
                 </div>
             </div>
         </div>
-    </div> 
-
+    </div>
     @include('layouts.admin_footer')
     <script>
-        $(document).ready(function() {
-            // $('#platform').select2({
-            //     dropdownParent: $('#AddModal')
-            // });
-        });
+        
+            $(document).ready(function(){
+                const elem = document.querySelector('input[name="datepicker"]');
+                const datepicker = new Datepicker(elem, {
+                    // options here
+                });
+            })
+    </script>
+    <script>
+   
     /**
      * To initialize the Editor, create a new instance with configuration object
      * @see docs/installation.md for mode details
      */
-    var editor = new EditorJS({
+    var editor;
+    $('.edit').on('click',function(){
+        editor = new EditorJS({
       /**
        * Enable/Disable the read only mode
        */
@@ -355,96 +403,137 @@
        */
       data: {
         blocks: [
-          
         ]
       },
       onReady: function(){
         //saveButton.click();
+        setTimeout(function() { 
+            var editor_blocks = <?php echo json_encode($desc_array); ?>;
+            console.log(editor_blocks);
+            var text = "";
+            $.each( editor_blocks, function( key, value ) {
+                
+                editor.blocks.insert(value.type, value.data);
+
+            });
+        }, 1000);
+        
+        //editor.blocks.insert(editor_blocks);
       },
       onChange: function(api, event) {
         console.log('something changed', event);
       }
     });
-
-    // /**
-    //  * Saving button
-    //  */
-    // const saveButton = document.getElementById('saveButton');
-
-    // /**
-    //  * Toggle read-only button
-    //  */
-    // const toggleReadOnlyButton = document.getElementById('toggleReadOnlyButton');
-    // const readOnlyIndicator = document.getElementById('readonly-state');
-
-    // /**
-    //  * Saving example
-    //  */
-    // saveButton.addEventListener('click', function () {
-    //   editor.save()
-    //     .then((savedData) => {
-    //       cPreview.show(savedData, document.getElementById("output"));
-    //     })
-    //     .catch((error) => {
-    //       console.error('Saving error', error);
-    //     });
-    // });
-
-    // /**
-    //  * Toggle read-only example
-    //  */
-    // toggleReadOnlyButton.addEventListener('click', async () => {
-    //   const readOnlyState = await editor.readOnly.toggle();
-
-    //   readOnlyIndicator.textContent = readOnlyState ? 'On' : 'Off';
-    // });
-        
-   
-    var projectTbl = '';
-    $(document).ready(function(){
-        toastr.options.timeOut = 1500; // 1.5s
-        projectTbl = $('#project-table').dataTable({
-            ajax: {
-                url: "{{ url('ajax/get-project') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ @csrf_token() }}",
-                    id:"{{$id}}"
-                },
-            },
-            processing: true,
-            columns: [
-                {data: 'project_data' }
-            ],
-            bLengthChange: false,
-            searching: true,
-            bPaginate: false,
-            language: { search: "", searchPlaceholder: "Search Project" }
-        });   
     })
+    
 
-    $(document).on('change','.platform-select',function(){
-        var search = $(this).val();
-        $('#project-table').DataTable().destroy();
-        projectTbl = $('#project-table').dataTable({
-            ajax: {
-                url: "{{ url('ajax/get-project') }}",
-                type: "POST",
-                data: {
-                    _token: "{{ @csrf_token() }}",
-                    search:search,
-                    id:"{{$id}}"
+   
+    
+
+    
+    $(document).on('click','.update-deadline-btn',function(){
+        var deadline = $('#deadline').val();
+        if(deadline != ""){
+            $(this).attr('disabled',true);
+            $(this).text('Processing');
+            $.ajax({
+                url: "{{ url('set-deadline') }}",
+                method: "POST",
+                data: { 
+                    _token: "{{ @csrf_token() }}", 	
+                    id 	 :"{{$project->id}}", 	
+                    deadline :deadline
                 },
-            },
-            processing: true,
-            columns: [
-                {data: 'project_data' }
-            ],
-            bLengthChange: false,
-            searching: true,
-            bPaginate: false,
-            language: { search: "", searchPlaceholder: "Search Project" }
-        });  
+                success: function(data) {
+                    var d = $.parseJSON( data );
+
+                    if( d.success == 1 ) {
+
+                        $('#deadlineModal').modal('hide');
+                        $('.update-deadline-btn').attr('disabled', false);
+                        $('.update-deadline-btn').text('Update');
+                        toastr.success('Updated Successfuly!');
+                        setTimeout(function() { 
+                            window.location.reload();
+                        }, 3000);
+                        
+                    } else {
+                        
+                        
+                        
+                    }
+                }
+            });
+        }
+        
+    })
+    $(document).on('click','.update-assign-btn',function(){
+        var assign_user = $('#assign_user').val();
+        if(assign_user != ""){
+            $(this).attr('disabled',true);
+            $(this).text('Processing');
+            $.ajax({
+                url: "{{ url('set-assign') }}",
+                method: "POST",
+                data: { 
+                    _token: "{{ @csrf_token() }}", 	
+                    id 	 :"{{$project->id}}", 	
+                    assign_user :assign_user
+                },
+                success: function(data) {
+                    var d = $.parseJSON( data );
+
+                    if( d.success == 1 ) {
+
+                        $('#assignModal').modal('hide');
+                        toastr.success('Updated Successfuly!');
+                        setTimeout(function() { 
+                            window.location.reload();
+                        }, 3000);
+                        
+                    } else {
+                        
+                        
+                        
+                    }
+                }
+            });
+        }
+        
+    })
+    $(document).on('click','.update-shared-btn',function(){
+        var share_user = $('#shared_user').val();
+        if(share_user != ""){
+            $(this).attr('disabled',true);
+            $(this).text('Processing');
+            $.ajax({
+                url: "{{ url('set-share') }}",
+                method: "POST",
+                data: { 
+                    _token: "{{ @csrf_token() }}", 	
+                    id 	 :"{{$project->id}}", 	
+                    share_user :share_user
+                },
+                success: function(data) {
+                    var d = $.parseJSON( data );
+
+                    if( d.success == 1 ) {
+
+                        $('#shareModal').modal('hide');
+                        toastr.success('Updated Successfuly!');
+                        setTimeout(function() { 
+                            window.location.reload();
+                        }, 3000);
+                        
+                    } else {
+                        
+                        
+                        
+                    }
+                }
+            });
+        }
+        
     })
 
     $(document).ready(function() {
@@ -511,7 +600,7 @@
             var description         = savedData.blocks;
             var description_html    = convertDataToHtml(savedData.blocks);      
             $.ajax({
-                url: "{{ url('add-project') }}",
+                url: "{{ url('edit-project') }}",
                 method: "POST",
                 data: { 
                     _token: "{{ @csrf_token() }}", 	
@@ -522,18 +611,18 @@
                     platform:platform,
                     description:description,
                     description_html:description_html,
+                    id:"{{$project->id}}"
                 },
                 success: function(data) {
                     var d = $.parseJSON( data );
 
                     if( d.success == 1 ) {
-                        projectTbl.api().ajax.reload();
-                        $('#userEditModal').modal('hide');
+                        $('#editModal').modal('hide');
                         toastr.success('Updated Successfuly!');
-                        $('#submit-btn').attr('disabled',false);
-                        $('#submit-btn').text('Submit');
-                        $('#AddModal').modal('hide');
-                        empty_value();
+                        setTimeout(function() { 
+                            window.location.reload();
+                        }, 2000);
+                        
                     } else {
                         
                         
@@ -547,85 +636,19 @@
     })
 
 
-    $(document).on('click', '.edit-user', function() {
-
-        var user_id = $(this).attr('data-id');
-        $('.update-user').attr('data-id', user_id);
-
-        $.ajax({
-            url: "{{ url('ajax/admin/get-employee-for-edit') }}",
-            type: "POST",
-            data: { _token: "{{ @csrf_token() }}", user_id: user_id },
-            success: function(data) {
-                var d = $.parseJSON( data );
-                console.log( data );
-                $('.editName').val( d.name );
-                $('.editPhone').val(d.phone);
-                $('.editPassword').val('');
-                $('.editDepartment').val(d.roles).change();
-                $('#userEditModal').modal('show');
-            }   
-        });
-
-    });
-
-    $(document).on('click', '.update-user', function(){
-        $(document).find('#edit-form-employee').parsley().whenValidate({
-            group: 'block-2'
-        }).done(function(){
-            var id          = $('.update-user').attr('data-id');
-			var name 		= $('.editName').val();
-			var password    = $('.editPassword').val();
-			var phone 		= $('.editPhone').val();
-			var department 		= $('.editDepartment').val();
-			
-			$.ajax({
-                url: "{{ url('update-employee') }}",
-                method: "POST",
-                data: { 
-                    _token: "{{ @csrf_token() }}", 	
-					name 	 :name, 	
-					password :password, 	
-					phone    :phone,
-					department :department,
-                    id:id
-                },
-                success: function(data) {
-                    var d = $.parseJSON( data );
-
-                    if( d.success == 1 ) {
-                        projectTbl.api().ajax.reload();
-                        $('#userEditModal').modal('hide');
-						toastr.success('Updated Successfuly!');
-                    } else {
-                       
-					 
-					   
-                    }
-                }
-            });
-        })
-    })
-
-    $(document).on('click', '.suspend-user', function() {
-
+    $(document).on('click', '#final-complete', function() {
         
-        var user_id = $(this).attr('data-id');
-        $('#final-suspend-user').attr('data-id', user_id);
-        $('#suspendUserModal').modal("show");
-
-    });
-
-    $(document).on('click', '#final-suspend-user', function() {
-        var user_id = $(this).attr('data-id');
         $.ajax({
-            url: "{{ url('ajax/admin/suspend-user') }}",
+            url: "{{ url('ajax/admin/mark-completed') }}",
             type: "POST",
-            data: { _token: "{{ @csrf_token() }}", user_id: user_id},
+            data: { _token: "{{ @csrf_token() }}", id:"{{$project->id}}" 
+        },
             success: function(data) {
-                projectTbl.api().ajax.reload();
-                $('#suspendUserModal').modal("hide");
-                toastr.success('Suspended Successfuly!');
+                    $('#completeModal').modal('hide');
+                    toastr.success('Updated Successfuly!');
+                    setTimeout(function() { 
+                        window.location.reload();
+                    }, 2000);
             }
         });
     });
