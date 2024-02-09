@@ -8,6 +8,8 @@ use App\Models\Log;
 use App\Models\Platform;
 use App\Models\Project;
 use App\Models\BidInvite;
+use App\Models\Revenue;
+use App\Models\CommissionReport;
 use Illuminate\Support\Facades\Hash;
 
 class AdminController extends Controller
@@ -17,42 +19,279 @@ class AdminController extends Controller
         if(Auth::user()->roles == 2 || Auth::user()->roles == 3){
             return redirect(url('/'));
         }
-        $monthly_earning = 0;
-        $monthly_bd_commission = 0;
-        $overall_earning = 0;
-        $overall_bd_commission = 0;
-        $completed_project = 0;
-        $pending_project = 0;
-        $employee = 0;
-        $platform = 0;
+        
+        $monthly_earning            = 0;
+        $monthly_earning_fiver      = 0;
+        $monthly_earning_upwork     = 0;
+        $monthly_earning_direct     = 0;
+        $monthly_earning_jobs       = 0;
+        $overall_earning            = 0;
+        $monthly_commission         = 0;
+        $monthly_invite_earning     = 0;
+        $monthly_bid_earning        = 0;
+        $monthly_bid_commission     = 0;
+        $monthly_invite_commission  = 0;
+
+        $overall_commission         = 0;
+        $overall_bid_commission     = 0;
+        $overall_invite_commission  = 0;
+        $overall_bid_earning        = 0;
+        $overall_invite_earning     = 0;
+        $overall_earning_fiver      = 0;
+        $overall_earning_upwork     = 0;
+        $overall_earning_direct     = 0;
+        $overall_earning_jobs       = 0;
+
+        $completed_project      = 0;
+        $pending_project        = 0;
+        $employee               = 0;
+        $platform               = 0;
 
         $first_day_this_month = date('Y-m-01');
 		$last_day_this_month = date("Y-m-t");
 
-        $projects = Project::all();
+        $revenue            = Revenue::where('completed_on','!=',NULL)->get();
+        $commission_report  = CommissionReport::where('status',1)->get();
+        
+        foreach($revenue as $rev){
+            $overall_earning += $rev->after_fees;
+            if($rev->source_p == 1){
+                $overall_earning_fiver += $rev->after_fees;
+            }else if($rev->source_p == 2){
+                $overall_earning_upwork += $rev->after_fees;
+            }else if($rev->source_p == 3){
+                $overall_earning_direct += $rev->after_fees;
+            }else{
+                $overall_earning_jobs += $rev->after_fees;
+            }
 
-        $employee = User::where('roles','!=',1)->count(); 
-        $platform = Platform::where('status',1)->count(); 
-        foreach($projects as $project){
-            $overall_earning += $project->net_profit;
-            $overall_bd_commission += $project->commission;           
-            if($project->created_at >= $first_day_this_month && $project->created_at <= $last_day_this_month){
-                $monthly_earning += $project->net_profit;
-                $monthly_bd_commission += $project->commission;
+            if($rev->completed_on >= $first_day_this_month && $rev->completed_on <= $last_day_this_month){
+                $monthly_earning += $rev->after_fees;
+
+                if($rev->source_p == 1){
+                    $monthly_earning_fiver += $rev->after_fees;
+                }else if($rev->source_p == 2){
+                    $monthly_earning_upwork += $rev->after_fees;
+                }else if($rev->source_p == 3){
+                    $monthly_earning_direct += $rev->after_fees;
+                }else{
+                    $monthly_earning_jobs += $rev->after_fees;
+                }
+            }
+        }
+        
+        foreach($commission_report as $com_rep){
+            $overall_commission += $com_rep->commission;
+            if($com_rep->bidinvite_type == 1){
+                $overall_bid_earning += $com_rep->earning;
+                $overall_bid_commission += $com_rep->commission; 
+            }else{
+                $overall_invite_earning += $com_rep->earning;
+                $overall_invite_commission  += $com_rep->commission; 
             }
             
-            if($project->status == 3){
-                $completed_project += 1;
-            }elseif ($project->status == 1){
-                $pending_project += 1;
+            if($com_rep->created_at >= $first_day_this_month && $com_rep->created_at <= $last_day_this_month){
+                $monthly_commission += $com_rep->commission;
+                if($com_rep->bidinvite_type == 1){
+                    $monthly_bid_earning    += $com_rep->earning; 
+                    $monthly_bid_commission += $com_rep->commission; 
+                }else{
+                    $monthly_invite_earning     += $com_rep->earning;
+                    $monthly_invite_commission  += $com_rep->commission;
+                }
+                
+            }
+        }
+
+        $overall_earning                = round($overall_earning,1);
+        $overall_commission             = round($overall_commission,1);
+        $overall_bid_commission         = round($overall_bid_commission,1);
+        $monthly_invite_commission      = round($monthly_invite_commission,1);
+        $overall_bid_earning            = round($overall_bid_earning,1);
+        $overall_invite_earning         = round($overall_invite_earning,1);
+        $overall_earning_fiver          = round($overall_earning_fiver,1);;
+        $overall_earning_upwork         = round($overall_earning_upwork,1);;
+        $overall_earning_direct         = round($overall_earning_direct,1);;
+        $overall_earning_jobs           = round($overall_earning_jobs,1);;
+
+        $monthly_earning                = round($monthly_earning,1);
+        $monthly_earning_fiver          = round($monthly_earning_fiver,1);
+        $monthly_earning_upwork         = round($monthly_earning_upwork,1);
+        $monthly_earning_direct         = round($monthly_earning_direct,1);
+        $monthly_earning_jobs           = round($monthly_earning_jobs,1);
+        $monthly_commission             = round($monthly_commission,1);
+        $monthly_bid_commission         = round($monthly_bid_commission,1); 
+        $monthly_invite_commission      = round($monthly_invite_commission,1); 
+        $monthly_bid_earning            = round($monthly_bid_earning,1); 
+        $monthly_invite_earning         = round($monthly_invite_earning,1); 
+        
+
+        
+
+
+        $title = "Dashboard";
+        return view('admin.index',compact('title','overall_earning','monthly_earning','monthly_earning_fiver','monthly_earning_upwork','monthly_earning_direct','monthly_commission','monthly_bid_commission','monthly_invite_commission','monthly_bid_earning','monthly_invite_earning','overall_bid_earning','overall_invite_earning','monthly_earning_jobs','completed_project','pending_project','employee','platform','overall_bid_commission','overall_invite_commission','overall_commission','overall_earning_fiver','overall_earning_upwork','overall_earning_direct','overall_earning_jobs'));
+    }
+    
+    public function monthly_earning(){
+        
+        if(Auth::user()->roles == 2 || Auth::user()->roles == 3){
+            return redirect(url('/'));
+        }
+        
+        $data_array = array();
+
+
+
+
+        $first_day_this_month = date('Y-m-01');
+		$last_day_this_month = date("Y-m-t");
+        $amount_total = 0;
+
+        $revenue = Revenue::where('completed_on','!=',NULL)->get();
+        $platform = array(
+            '1' => 'Fiver',
+            '2' => 'Upwork',
+            '3' => 'Direct',
+            '4' =>'Jobs',
+        );
+
+        foreach($revenue as $rev){
+            $source_name = $rev->source_username;
+
+            if(count($data_array) == 0){
+                array_push($data_array,array(
+                    $source_name => array(
+                        'Fiver'     => 0,
+                        'Upwork'    => 0,
+                        'Direct'    => 0,
+                        'Jobs'      => 0,
+                        'total'     => 0
+                    ))
+                );
             }else{
+                $insert = true;
+                foreach($data_array as $arr){
+                    if(key($arr) == $source_name){
+                        
+                        $insert = false;
+                    }
+                }
+                if($insert){
+                    array_push($data_array,array(
+                        $source_name => array(
+                            'Fiver'     => 0,
+                            'Upwork'    => 0,
+                            'Direct'    => 0,
+                            'Jobs'     => 0,
+                            'total'     => 0
+                        ))
+                    );
+                }
+                
+            }
+            
+            
+            if($rev->completed_on >= $first_day_this_month && $rev->completed_on <= $last_day_this_month){
+                $type = $platform[$rev->source_p];
+                foreach($data_array as $k=>$arry){
+                    foreach($arry as $key=>$a){
+                        if($key == $source_name){
+                            $data_array[$k][$key][$type] += round($rev->after_fees,2);
+                            $data_array[$k][$key]['total'] += round($rev->after_fees,2);
+                            $amount_total += round($rev->after_fees,2);
+                        }
+                    }
+                    
+                }
+
+            }
+        }
+        
+
+
+
+        $title = "Monthly Earning";
+        return view('admin.monthly_earning',compact('title','data_array','amount_total'));
+    }
+
+    public function alltime_earning(){
+        
+        if(Auth::user()->roles == 2 || Auth::user()->roles == 3){
+            return redirect(url('/'));
+        }
+        
+        $data_array = array();
+
+
+
+
+        $first_day_this_month = date('Y-m-01');
+		$last_day_this_month = date("Y-m-t");
+        $amount_total = 0;
+
+        $revenue = Revenue::where('completed_on','!=',NULL)->get();
+        $platform = array(
+            '1' => 'Fiver',
+            '2' => 'Upwork',
+            '3' => 'Direct',
+            '4' =>'Jobs',
+        );
+
+        foreach($revenue as $rev){
+            $source_name = $rev->source_username;
+
+            if(count($data_array) == 0){
+                array_push($data_array,array(
+                    $source_name => array(
+                        'Fiver'     => 0,
+                        'Upwork'    => 0,
+                        'Direct'    => 0,
+                        'Jobs'      => 0,
+                        'total'     => 0
+                    ))
+                );
+            }else{
+                $insert = true;
+                foreach($data_array as $arr){
+                    if(key($arr) == $source_name){
+                        
+                        $insert = false;
+                    }
+                }
+                if($insert){
+                    array_push($data_array,array(
+                        $source_name => array(
+                            'Fiver'     => 0,
+                            'Upwork'    => 0,
+                            'Direct'    => 0,
+                            'Jobs'     => 0,
+                            'total'     => 0
+                        ))
+                    );
+                }
+                
+            }
+            
+            $type = $platform[$rev->source_p];
+            foreach($data_array as $k=>$arry){
+                foreach($arry as $key=>$a){
+                    if($key == $source_name){
+                        $data_array[$k][$key][$type] += round($rev->after_fees,2);
+                        $data_array[$k][$key]['total'] += round($rev->after_fees,2);
+                        $amount_total += round($rev->after_fees,2);
+                    }
+                }
                 
             }
 
         }
+        
 
-        $title = "Dashboard";
-        return view('admin.index',compact('title','overall_earning','overall_bd_commission','monthly_earning','monthly_bd_commission','completed_project','pending_project','employee','platform'));
+
+
+        $title = "All Time Earning";
+        return view('admin.alltime_earning',compact('title','data_array','amount_total'));
     }
 
     //employee functions
@@ -132,7 +371,8 @@ class AdminController extends Controller
                 $status = '';
                 $project_url = url('projects').'/'.$user->id;
                 if ($user->status == 1) {
-                    $action_btn .= ' <button class="btn btn-sm btn-warning edit-user" data-id="' . $user->id . '">Edit</button> <a class="btn btn-sm btn-primary view-user" href="'.$project_url.'" data-id="{{ $user->id }}">Projects</a> ';
+                    $action_btn .= '<button class="btn btn-sm btn-warning edit-user mr-2" data-id="' . $user->id . '">Edit</button>';
+                    $action_btn .= '<a href='.url('employee/report').'/'.$user->id.' class="btn btn-sm btn-secondary mr-2">View</a>';
                     $action_btn .= '<button class="btn btn-sm btn-danger suspend-user" data-id="' . $user->id . '">Suspend</button>';
                     $status.= '<span class="badge badge-success">active</span>';
                 } else {
@@ -164,6 +404,144 @@ class AdminController extends Controller
         }
 
         echo json_encode(array('data' => $all_user_data));
+    }
+
+    public function employee_report($id){
+        if(Auth::user()->roles == 2 || Auth::user()->roles == 3){
+            return redirect(url('/'));
+        }
+
+        $id = intval($id);
+
+        $monthly_earning    = 0;
+        $overall_earning    = 0;
+        $bid_earning        = 0;
+        $invite_earning     = 0;
+        $bid_commission     = 0;
+        $invite_commission  = 0;
+        $completed_project  = 0;
+        $pending_project    = 0;
+        $commission         = 0;
+        $overall_commission = 0;
+
+        $first_day_this_month = date('Y-m-01');
+		$last_day_this_month = date("Y-m-t");
+
+        $revenue = Revenue::all();
+        foreach($revenue as $rev){
+            if($rev->completed_on != NULL){
+                if( $rev->owner_id == $id ){
+                    $completed_project += 1;
+                    $overall_earning += $rev->earning;
+                    $overall_commission += $rev->commission;
+                    
+                    if($rev->completed_on >= $first_day_this_month && $rev->completed_on <= $last_day_this_month){
+                        $monthly_earning += $rev->earning;
+        
+                        $commission += $rev->commission;
+                        
+                        if($rev->project_type == 1){
+                            $bid_earning += $rev->earning;
+                            $bid_commission += $rev->commission;
+                        }else if($rev->project_type == 2){
+                            $invite_earning += $rev->earning;
+                            $invite_commission += $rev->commission;
+                        }else{
+    
+                        }
+                    }
+                }
+    
+                if( $rev->shared_id == $id ){
+                    $completed_project += 1;
+                    $overall_earning += $rev->shared_earning;
+                    $overall_commission += $rev->shared_commission;
+                    
+                    
+                    if($rev->completed_on >= $first_day_this_month && $rev->completed_on <= $last_day_this_month){
+                        $monthly_earning += $rev->shared_earning;
+        
+                        $commission += $rev->shared_commission;
+                        
+                        if($rev->project_type == 1){
+                            $bid_earning += $rev->shared_earning;
+                            $bid_commission += $rev->shared_commission;
+                        }else if($rev->project_type == 2){
+                            $invite_earning += $rev->shared_earning;
+                            $invite_commission += $rev->shared_commission;
+                        }else{
+    
+                        }
+                    }
+                }
+            }else{
+                if( $rev->owner_id == $id || $rev->shared_id == $id){
+                    $pending_project    += 1;
+                }
+            }
+            
+
+            
+        }
+
+        
+        $monthly_earning   = round($monthly_earning, 1);
+        $overall_earning   = round($overall_earning, 1);
+        $bid_earning       = round($bid_earning, 1);
+        $invite_earning    = round($invite_earning, 1);
+        $bid_commission    = round($bid_commission, 1);
+        $invite_commission = round($invite_commission, 1);
+        $commission        = round($commission, 1);
+        $overall_commission = round($overall_commission, 1);
+
+        $comm = BidInvite::where('type', 1)->where('status',1)->get();
+
+		foreach($comm as $c){
+			
+			
+			if($bid_earning >= $c->com_from &&  $bid_earning <= $c->com_to ){
+				
+				$bid_commission = $bid_earning * ($c->commission/100);
+                break;
+				
+			} 
+			
+		}
+
+        $comm = BidInvite::where('type', 2)->where('status',1)->get();
+
+		foreach($comm as $c){
+			
+			
+			if($invite_earning >= $c->com_from &&  $invite_earning <= $c->com_to ){
+				
+				$invite_commission = $invite_earning * ($c->commission/100);
+                break;
+				
+			} 
+			
+		}
+
+        $bid_commission = round($bid_commission, 1);
+        $commission = round($bid_commission+$invite_commission,1);
+        $overall_commission = round($overall_commission, 1);
+
+        $user = User::find($id);
+        $title = $user->name."'s Dashboard";
+        return view('admin.employee.report',compact('title',
+            'monthly_earning',   
+            'overall_earning',   
+            'bid_earning',       
+            'invite_earning',    
+            'bid_commission',    
+            'invite_commission', 
+            'completed_project', 
+            'pending_project',   
+            'commission',        
+            'overall_commission',
+
+        ));
+
     }
 
     public function ajax_admin_get_employee(Request $request){
@@ -509,9 +887,10 @@ class AdminController extends Controller
 
         $id  = $id;
 
-        $platform = Platform::where('status',1)->get();
+        $platform   = Platform::where('status',1)->get();
+        $bd         = user::where('roles',2)->where('status',1)->get();
         $title = "Projects";
-        return view('admin.project.index', compact('title','platform','id'));
+        return view('admin.project.index', compact('title','platform','id','bd'));
     }
 
     public function store_project(Request $request){
@@ -522,38 +901,64 @@ class AdminController extends Controller
         $ip              = $_SERVER['REMOTE_ADDR'];
         $loggedInUser    = Auth::user();
         $title           = $request->title;
-        $client_email    = $request->client_email;
+        $project_link    = $request->project_link;
+        $project_type    = $request->project_type;
         $client_name     = $request->client_name;
+        $client_type     = $request->client_type;
         $amount          = $request->amount;
         $platform        = $request->platform;
-        $description     = json_encode($request->description);
-        $description_html     = $request->description_html;
-        $commission      = 0;
-        $net_profit         = 0;
-        $platform_row = Platform::where('id',$platform)->first();
-        if($platform_row){
-            $commission = $amount*($platform_row->commission/100);
-            $net_profit  = $amount - $commission; 
+        $bd              = $request->bd;
 
+        $after_fees = $amount;
+        $pf = Platform::where('id',$platform)->first();
+
+        if($pf){
+            if($pf->type == 1){
+                //fiver 20%
+                $per = $amount*0.2;
+                $after_fees = $amount - $per;
+            }else if($pf->type == 2){
+                //upwork 10%
+                $per = $amount*0.1;
+                $after_fees = $amount - $per;
+            }else{
+                $after_fees = $amount;
+            }
         }
         
         $project 		        = new Project;
         
         $project->title 	            = $title;
-        $project->client_email 	        = $client_email;
+        $project->project_link 	        = $project_link;
+        $project->project_type 	        = $project_type;
         $project->client_name 	        = $client_name;
-        $project->description           = $description;
-        $project->description_html      = $description_html;
+        $project->client_type 	        = $client_type;
         $project->platform_id           = $platform;
         $project->total_amount          = $amount;
-        $project->net_profit            = $net_profit;
-        $project->commission            = $commission;
-        $project->owner                 = $loggedInUser->id;
+        $project->after_fees            = $after_fees;
+        $project->owner                 = $bd;
         $project->created_by            = $loggedInUser->id;
         
         $project->save();
 
         if($project->id > 0){
+
+            $revenue 		        = new Revenue;
+        
+            $revenue->project_id 	        = $project->id;
+            $revenue->amount 	            = $amount;
+            $revenue->after_fees 	        = $after_fees;
+            $revenue->project_type 	        = $project_type;
+            $revenue->source_type 	        = $platform;
+            $revenue->commission 	        = 0;
+            $revenue->shared_commission     = 0;
+            $revenue->owner_id              = $bd;
+            $revenue->earning               = $after_fees;
+            $revenue->source_p              = $pf->type;
+            $revenue->source_username       = $pf->name;
+            
+            $revenue->save();
+
 
             $addr_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
 
@@ -579,29 +984,66 @@ class AdminController extends Controller
         if(isset($request->search)){
             $platform = Platform::where('type', $request->search)->get();
             foreach($platform as $p){
-                $ind_project = Project::where('platform_id', $p->id)->get();
+                $ind_project = Project::where('platform_id', $p->id)->orderBy('created_at', 'Desc')->get();
                 foreach($ind_project as $i_p){
                     array_push($all_project, $i_p);
                 }
                 
-                
             }
         }else{
-            $all_project = Project::all();
+            $all_project = Project::orderBy('created_at', 'Desc')->get();
         }
         
         $all_project_data = array();
+
+        $platform   = $request->platform;
+        $month      = $request->month;
+        $type      = $request->type;
+        $status_f      = $request->status;
         
         if ($all_project) {
             $count = 0;
             foreach ($all_project as $project) {
-                
-                if(isset($request->search)){
-                    if($request->id != "all"){
-                        if($project->owner != $request->id && $project->shared_user != $request->id){
-                            continue;
+                $go = false;
+                if($month == date("M Y", strtotime($project->created_at))){
+                    $go = true;
+                    if($type != null && $status_f != null){
+                        if($project->project_type == $type && $project->status == $status_f ){
+                            $go = true;
+                        }else{
+                            $go = false;
+                        }
+                    }else if($type != null || $status_f != null){
+                        
+                        if($type != null){
+                            
+                            if($project->project_type == $type ){
+                                $go = true;
+                            }else{
+                                $go = false;
+                            }   
+                        }
+
+                        if($status_f != null){
+                            if($project->status == $status_f ){
+                                $go = true;
+                            }else{
+                                $go = false;
+                            }
                         }
                     }
+                    
+                }else{
+                    $go = false;
+                }
+
+                
+                if(isset($request->search)){
+                    // if($request->id != "all"){
+                    //     if($project->owner != $request->id && $project->shared_user != $request->id){
+                    //         continue;
+                    //     }
+                    // }
                     
                     $platform = Platform::where('id', $project->platform_id)->first();
                     $owner_user = User::find($project->owner);
@@ -629,7 +1071,7 @@ class AdminController extends Controller
                     if ($project->status == 1) {
                         $action_btn .= ' <button class="btn btn-sm btn-warning edit-project" data-id="'.$project->id.'">Edit</button> <button class="btn btn-sm btn-primary view-project" data-id="{{ $project->id }}">View</button> ';
                         $action_btn .= '<button class="btn btn-sm btn-danger suspend-project" data-id="'.$project->id.'">Suspend</button>';
-                        $status.= '<span class="badge badge-warning">Pending</span>';
+                        $status.= '<span class="badge badge-primary">In Progress</span>';
                     } else if($project->status == 2) {
                         $action_btn .= '<button class="btn btn-sm btn-success resume-project" data-id="'.$project->id.'">Resume</button>';
                         $status.= '<span class="badge badge-primary">In Progress</span>';
@@ -637,7 +1079,10 @@ class AdminController extends Controller
                         $status.= '<span class="badge badge-success">Completed</span>';
                     }
                     
-                    
+                    $project_type ="Invite";
+                    if($project->project_type == 1){
+                        $project_type ="Bid";
+                    }
                     $element = '<div class="row">
                         <div class="col-12 col-md-2  bg-light d-flex align-items-center justify-content-center rounded">
                             <div>
@@ -647,38 +1092,50 @@ class AdminController extends Controller
                         </div>
                         <div class="col-12 col-md-7">
                             <h4 class="mb-1">'.$project->title.'</h4>
-                            <p class="mb-0 font-weight-bold">'.$project->client_email.'</p>
                             <p class="mb-1">'.$project->client_name.'</p>
-                            <div class="d-flex align-items-start justify-content-start">
-                            '.$status.'
-                            </div>
+                            
                             <div class="d-flex justify-content-start align-items-center mt-2">
                                 <p class="mb-0">Created Date: <span class="text-dark">'.date("j M, Y", strtotime($project->created_at)).'</span></p>
-                                <p class="mb-0 mx-4">Account Holder: <span class="text-dark">'.$platform->name.'</span></p>
-                                <p class="mb-0">Project Owner: <span class="text-dark">'.$owner.'</span></p>
+                                <p class="mb-0 mx-4">Source: <span class="text-dark">'.$platform->name.'</span></p>
+                                <p class="mb-0 mx-4">Owner: <span class="text-dark">'.$owner.'</span></p>
+                                <p class="mb-0 mx-4">Type: <span class="text-dark">'.$project_type.'</span></p>
                             </div>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <div class="d-flex align-items-end justify-content-end">
-                                <h4 class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</h4>
-                            </div>
-                            <div class=" d-flex justify-content-end align-items-end mt-5">
-                                <a href="'.url('project').'/'.$project->id.'" class="btn btn-sm btn-danger edit-project" >
+                            <div class=" d-flex justify-content-start align-items-end mt-3">
+                                <a href="'.url('project').'/'.$project->id.'" class="btn btn-sm btn-light edit-project" >
                                 <i class="fas fa-fw fa-cog"></i>
                                 Settings</a> 
                             </div>
                         </div>
+                        <div class="col-12 col-md-3">
+                            <div class="d-flex align-items-start justify-content-end mb-4">
+                            '.$status.'
+                            </div>
+                            <div class="d-flex align-items-end justify-content-end">
+                                <div class="border-right px-2">
+                                    <p class="mb-0">Cost</p>
+                                    <p class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</p>
+                                </div>
+                                <div class="mx-2">
+                                    <p class="mb-0">After Fees</p>
+                                    <p class="mb-0 text-dark font-weight-bold">$'.$project->after_fees.'</p>
+                                </div>
+                            </div>
+                            
+                        </div>
                     </div>';
-
+                    
                     $count++;
 
                     $all_project_data[] = array(
                         'project_data'  => $element
                     );
                 }else{
+                    if(!$go){
+                        continue;
+                    }
                     if($request->id != "all"){
                         
-                        if($project->owner != $request->id && $project->shared_user != $request->id){
+                        if($project->owner != $request->id && $project->shared_user != $request->id ){
                             
                             continue;
                         }
@@ -712,7 +1169,7 @@ class AdminController extends Controller
                     if ($project->status == 1) {
                         $action_btn .= ' <button class="btn btn-sm btn-warning edit-project" data-id="'.$project->id.'">Edit</button> <button class="btn btn-sm btn-primary view-project" data-id="{{ $project->id }}">View</button> ';
                         $action_btn .= '<button class="btn btn-sm btn-danger suspend-project" data-id="'.$project->id.'">Suspend</button>';
-                        $status.= '<span class="badge badge-warning">Pending</span>';
+                        $status.= '<span class="badge badge-primary">In Progress</span>';
                     } else if($project->status == 2) {
                         $action_btn .= '<button class="btn btn-sm btn-success resume-project" data-id="'.$project->id.'">Resume</button>';
                         $status.= '<span class="badge badge-primary">In Progress</span>';
@@ -720,6 +1177,10 @@ class AdminController extends Controller
                         $status.= '<span class="badge badge-success">Completed</span>';
                     }
                     
+                    $project_type ="Invite";
+                    if($project->project_type == 1){
+                        $project_type ="Bid";
+                    }
                     $element = '<div class="row">
                         <div class="col-12 col-md-2  bg-light d-flex align-items-center justify-content-center rounded">
                             <div>
@@ -729,26 +1190,35 @@ class AdminController extends Controller
                         </div>
                         <div class="col-12 col-md-7">
                             <h4 class="mb-1">'.$project->title.'</h4>
-                            <p class="mb-0 font-weight-bold">'.$project->client_email.'</p>
                             <p class="mb-1">'.$project->client_name.'</p>
-                            <div class="d-flex align-items-start justify-content-start">
-                            '.$status.'
-                            </div>
+                            
                             <div class="d-flex justify-content-start align-items-center mt-2">
                                 <p class="mb-0">Created Date: <span class="text-dark">'.date("j M, Y", strtotime($project->created_at)).'</span></p>
-                                <p class="mb-0 mx-4">Account Holder: <span class="text-dark">'.$platform->name.'</span></p>
-                                <p class="mb-0">Project Owner: <span class="text-dark">'.$owner.'</span></p>
+                                <p class="mb-0 mx-4">Source: <span class="text-dark">'.$platform->name.'</span></p>
+                                <p class="mb-0 mx-4">Owner: <span class="text-dark">'.$owner.'</span></p>
+                                <p class="mb-0 mx-4">Type: <span class="text-dark">'.$project_type.'</span></p>
                             </div>
-                        </div>
-                        <div class="col-12 col-md-3">
-                            <div class="d-flex align-items-end justify-content-end">
-                                <h4 class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</h4>
-                            </div>
-                            <div class=" d-flex justify-content-end align-items-end mt-5">
-                                <a href="'.url('project').'/'.$project->id.'" class="btn btn-sm btn-danger edit-project" >
+                            <div class=" d-flex justify-content-start align-items-end mt-3">
+                                <a href="'.url('project').'/'.$project->id.'" class="btn btn-sm btn-light edit-project" >
                                 <i class="fas fa-fw fa-cog"></i>
                                 Settings</a> 
                             </div>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="d-flex align-items-start justify-content-end mb-4">
+                            '.$status.'
+                            </div>
+                            <div class="d-flex align-items-end justify-content-end">
+                                <div class="border-right px-2">
+                                    <p class="mb-0">Cost</p>
+                                    <p class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</p>
+                                </div>
+                                <div class="mx-2">
+                                    <p class="mb-0">After Fees</p>
+                                    <p class="mb-0 text-dark font-weight-bold">$'.$project->after_fees.'</p>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>';
                     
@@ -924,34 +1394,45 @@ class AdminController extends Controller
 
             if($project->status != 3){
                 $buttons =' <div class="text-wrap text-break d-flex gap-3 align-items-center justify-content-end my-3">
-                <a type="button" href="#" data-toggle="modal" data-target="#deadlineModal" class="btn-sm mr-2 px-3 btn btn-danger text-sm">Deadline</a>
                 <a type="button" href="#" data-toggle="modal" data-target="#editModal" class="edit btn-sm mr-2 px-3 btn btn-warning text-sm">Edit</a>
-                <a type="button" href="#" data-toggle="modal" data-target="#assignModal" class="btn-sm mr-2 px-3 btn btn-dark text-sm">Assign</a>
-                <a type="button" href="#" data-toggle="modal" data-target="#shareModal" class="btn-sm px-3  mr-2 btn btn-primary text-sm">Share</a>
+                <a type="button" href="#" data-toggle="modal" data-target="#deadlineModal" class="btn-sm mr-2 px-3 btn btn-danger text-sm">Deadline</a>
                 <a type="button" href="#" data-toggle="modal" data-target="#completeModal" class="btn-sm px-3 btn btn-success text-sm">Mark Complete</a>
             </div>';
             }
-            
+            $project_type ="Invite";
+            if($project->project_type == 1){
+                $project_type ="Bid";
+            }
             $element = '<div class="row border-bottom pb-3 mb-4">
-                <div class="col-12 col-md-2  bg-light d-flex align-items-center justify-content-center rounded">
-                    <div>
+                <div class="col-12 col-md-4   d-flex align-items-center justify-content-start ">
+                    <div class="rounded bg-light p-5">
                     '.$image.'
                 
                     </div>
-                </div>
-                <div class="col-12 col-md-10">
-                    <div class="d-flex justify-content-between">
-                        <p class="mb-0 font-weight-bold">'.$project->client_email.'</p>
-                        <h4 class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</h4>
+                    <div class="mx-3">
+                        <p class="mb-1 h4">'.$project->title.'</p>
+                        <p class="mb-1 h6">'.$project->client_name.'</p>
                     </div>
-                    <div class="d-flex align-items-start justify-content-start my-2">
+                </div>
+                <div class="col-12 col-md-8">
+                    <div class="d-flex align-items-start justify-content-end mb-4">
                     '.$status.'
                     </div>
-                    <p class="mb-1">'.$project->client_name.'</p>'.$buttons.'
+                    <div class="d-flex align-items-end justify-content-end">
+                        <div class="border-right px-2">
+                            <p class="mb-0">Cost</p>
+                            <p class="mb-0 text-dark font-weight-bold">$'.$project->total_amount.'</p>
+                        </div>
+                        <div class="mx-2">
+                            <p class="mb-0">After Fees</p>
+                            <p class="mb-0 text-dark font-weight-bold">$'.$project->after_fees.'</p>
+                        </div>
+                    </div>
+                    '.$buttons.'
                    
                 </div>
             </div>';
-            
+
             $deadline = "N/A";
             if($project->due_date != NULL){
                 $deadline = date("j M, Y", strtotime($project->due_date));
@@ -969,26 +1450,22 @@ class AdminController extends Controller
             }
             $modal_ele = '<div class="text-start mt-2">
                     <p class="font-weight-bold fs-14">Owner: <span class="text-dark font-weight-normal">'.$owner.'</span></p>
-                    <p class="font-weight-bold fs-14">Account Holder: <span class="text-dark font-weight-normal">'.$platform->name.'</span></p>
-                    <p class="font-weight-bold fs-14">Manage By: <span class="text-dark font-weight-normal">'.$s_user.'</span></p>
+                    <p class="font-weight-bold fs-14">Source: <span class="text-dark font-weight-normal">'.$platform->name.'</span></p>
+                    <p class="font-weight-bold fs-14">Shared User: <span class="text-dark font-weight-normal">'.$s_user.'</span></p>
                     <p class="font-weight-bold fs-14">Created On: <span class="text-dark font-weight-normal">'.date("j M, Y", strtotime($project->created_at)).'</span></p>
                     <p class="font-weight-bold fs-14">Deadline: <span class="text-dark font-weight-normal">'.$deadline.'</span></p>
                     <p class="font-weight-bold fs-14">Completed On: <span class="text-dark font-weight-normal">'.$completed_date.'</span></p>
-                    <p class="font-weight-bold fs-14">Net Revenue: <span class="text-dark font-weight-normal">$'.$project->net_profit.'</span></p>
-                    <p class="font-weight-bold fs-14">BD Commission: <span class="text-dark font-weight-normal">$'.$project->commission.'</span></p>
                     
                     
                 </div>';
 
             $bd_users = User::where('roles',2)->where('status',1)->get();
-            $s_users = User::where('roles',3)->where('status',1)->get();
+            $s_users = User::where('roles',2)->where('status',1)->get();
 
-            $title = $project->title;
+            $title = 'Project Details';
             $description = json_decode($project->description);
             $desc_array =array();
-            foreach($description as $d){
-                array_push($desc_array, $d);
-            }
+           
             $desc_array = $desc_array;
             return view('admin.project.single', compact('title','element','project','all_platform','modal_ele','bd_users','s_users','desc_array'));
         }
@@ -1100,38 +1577,88 @@ class AdminController extends Controller
             return redirect(url('/'));
         }
 
-        $ip              = $_SERVER['REMOTE_ADDR'];
-        $loggedInUser    = Auth::user();
-        $title           = $request->title;
-        $client_email    = $request->client_email;
-        $client_name     = $request->client_name;
-        $amount          = $request->amount;
-        $platform        = $request->platform;
-        $description     = json_encode($request->description);
-        $description_html  = $request->description_html;
-        $commission         = 0;
-        $net_profit         = 0;
-        $platform_row = Platform::where('id',$platform)->first();
-        if($platform_row){
-            $commission = $amount*($platform_row->commission/100);
-            $net_profit  = $amount - $commission; 
+        $ip                 = $_SERVER['REMOTE_ADDR'];
+        $loggedInUser       = Auth::user();
+        $title              = $request->title;
+        $platform           = $request->platform;
+        $assign_user        = $request->assign_user;
+        $share_user         = $request->share_user;
+        $share_commission   = $request->share_commission;
+        $project_link       = $request->project_link;
+        $project_type       = $request->project_type;
+        $amount             = $request->amount;
+        $client_name        = $request->client_name;
 
+        $after_fees = $amount;
+        $pf = Platform::where('id',$platform)->first();
+
+        if($pf){
+            if($pf->type == 1){
+                //fiver 20%
+                $per = $amount*0.2;
+                $after_fees = $amount - $per;
+            }else if($pf->type == 2){
+                //upwork 10%
+                $per = $amount*0.1;
+                $after_fees = $amount - $per;
+            }else{
+                $after_fees = $amount;
+            }
         }
+
+        $owner_amount = 0;
+        $share_amount = 0;
+        
+        if($share_user != 0){
+
+            if($share_commission != 0){
+                
+                $share_amount = $after_fees*($share_commission/100);
+                 
+            }else{
+                $share_commission = 50;
+                $share_amount = $after_fees*($share_commission/100);
+            }
+            $owner_amount = $after_fees - $share_amount;
+            
+        }else{
+            $owner_amount = $after_fees;
+        }
+
         
         $id = intval($request->id);
         $project 		        = Project::find($id);
         
         $project->title 	            = $title;
-        $project->client_email 	        = $client_email;
         $project->client_name 	        = $client_name;
-        $project->description           = $description;
-        $project->description_html      = $description_html;
         $project->platform_id           = $platform;
         $project->total_amount          = $amount;
-        $project->net_profit            = $net_profit;
-        $project->commission            = $commission;
-        
+        $project->after_fees            = $after_fees;
+        $project->owner 	            = $assign_user;
+        if($share_user != 0){
+            $project->shared_user 	    = $share_user;
+        }
+
         $project->save();
+
+        
+        $revenue 		        = Revenue::where('project_id',$project->id)->first();
+        
+        $revenue->amount 	            = $amount;
+        $revenue->after_fees 	        = $after_fees;
+        $revenue->project_type 	        = $project_type;
+        $revenue->source_type 	        = $platform;
+        $revenue->earning 	            = $owner_amount;
+        $revenue->commission 	        = 0;
+        $revenue->shared_earning        = $share_amount;
+        $revenue->shared_commission     = 0;
+        $revenue->owner_id              = $assign_user;
+        if($share_user != 0){
+            $revenue->shared_id         = $share_user;
+        }
+        
+        $revenue->save();
+
 
         
 
@@ -1170,7 +1697,150 @@ class AdminController extends Controller
         $project->completed_date 	    = now();
         
         $project->save();
+
+        $revenue 		        = Revenue::where('project_id',$project->id)->first();
         
+        $owner_earning  = $revenue->earning;
+        $shared_earning = 0;
+        if($revenue->shared_earning != 0){
+            $shared_earning = $revenue->shared_earning;
+        }
+
+        $comm = BidInvite::where('type', $revenue->project_type)->where('status',1)->get();
+
+        $commission_exist = true;
+        $owner_commission   = 0;
+        $shared_commission  = 0;
+		foreach($comm as $c){
+			
+			
+			if($owner_earning >= $c->com_from &&  $owner_earning <= $c->com_to ){
+				
+				$owner_commission = $owner_earning * ($c->commission/100);
+                break;
+				
+			} 
+			
+		}
+
+        if($shared_earning != 0){
+            foreach($comm as $c){
+			
+			
+                if($shared_earning >= $c->com_from &&  $shared_earning <= $c->com_to ){
+                    
+                    $shared_commission = $shared_earning * ($c->commission/100);
+                    break;
+                    
+                } 
+                
+            }
+        }
+
+        $revenue->commission 	        = $owner_commission;
+        $revenue->shared_commission     = $shared_commission;
+        $revenue->completed_on          = now();
+
+        //date 1 month back 
+        // $revenue->completed_on          = date('Y-m-d H:i:s',strtotime('-1 months'));
+        $revenue->save();
+        
+
+        $first_day_this_month = date('Y-m-01');
+		$last_day_this_month = date("Y-m-t");
+        $owner_commission_report = CommissionReport::where('user_id', $revenue->owner_id)->first();
+        
+        $create_new = false;
+        if($owner_commission_report){
+            if($owner_commission_report->created_at >= $first_day_this_month && $owner_commission_report->created_at <= $last_day_this_month) {
+                
+                if($owner_commission_report->bidinvite_type == $revenue->project_type){
+                    $nearning = $owner_commission_report->earning + $revenue->earning;
+                    foreach($comm as $c){
+                        
+                        
+                        if($nearning >= $c->com_from &&  $nearning <= $c->com_to ){
+                            
+                            $owner_commission = $nearning * ($c->commission/100);
+                            break;
+                            
+                        } 
+                        
+                    }
+                    CommissionReport::where('id', $owner_commission_report->id)->update([
+                        'earning' => $nearning,
+                        'commission' => $owner_commission 
+                    ]);
+                    
+                }else{
+                    $create_new = true;
+                }
+            }else{
+                $create_new = true;
+            }
+        }else{
+            $create_new = true;
+        }
+        if($create_new){
+            
+            $cr 		        = new CommissionReport;
+            $cr->user_id        = $revenue->owner_id;
+            $cr->bidinvite_type = $revenue->project_type;
+            $cr->earning        = $revenue->earning;
+            $cr->commission     = $owner_commission;
+            //date 1 month back 
+            // $cr->created_at          = date('Y-m-d H:i:s',strtotime('-1 months'));
+            $cr->save();
+            
+        }
+        if($shared_earning != 0){
+            $shared_commission_report = CommissionReport::where('user_id', $revenue->shared_id)->first();
+            $create_new_shared = false;
+            if($shared_commission_report){
+                if($shared_commission_report->created_at >= $first_day_this_month && $shared_commission_report->created_at <= $last_day_this_month) {
+                    
+                    if($shared_commission_report->bidinvite_type == $revenue->project_type){
+                        $nearning = $shared_commission_report->earning + $revenue->shared_earning;
+                        foreach($comm as $c){
+                            
+                            
+                            if($nearning >= $c->com_from &&  $nearning <= $c->com_to ){
+                                
+                                $shyared_commission = $nearning * ($c->commission/100);
+                                break;
+                                
+                            } 
+                            
+                        }
+                        CommissionReport::where('id', $shared_commission_report->id)->update([
+                            'earning' => $nearning,
+                            'commission' => $shyared_commission 
+                        ]);
+                        
+                    }else{
+                        $create_new_shared = true;
+                    }
+                } else {
+                    $create_new_shared = true;
+                }
+            }else{
+                        
+               $create_new_shared = true;
+            }
+            if($create_new_shared){
+                $cr 		        = new CommissionReport;
+                $cr->user_id        = $revenue->shared_id;
+                $cr->bidinvite_type = $revenue->project_type;
+                $cr->earning        = $revenue->shared_earning;
+                $cr->commission     = $shared_commission;
+                //date 1 month back 
+                // $cr->created_at          = date('Y-m-d H:i:s',strtotime('-1 months'));
+                $cr->save();
+            }
+        }
+
+        
+
         $addr_name = gethostbyaddr($_SERVER['REMOTE_ADDR']);
         
         $log 		= new Log;

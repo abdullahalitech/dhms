@@ -30,7 +30,7 @@
     <link href="{{url('template/css/datepicker/datepicker-bulma.min.css')}}" rel="stylesheet" />
     <!-- For Foundation -->
     <link href="{{url('template/css/datepicker/datepicker-foundation.min.css')}}" rel="stylesheet" />
-
+    <link rel="icon" type="image/x-icon" href="{{url('images/favicon.png')}}" sizes="32x32" />
     <style>
         .w-150{
             width:150px!important;
@@ -102,18 +102,42 @@
         }
 
         .paginate_button:hover {
-            background-color: #4e73df;
+            background-color: #000;
             color: #fff;
-            border-color: #4e73df;
+            border-color: #000;
         }
 
         .current {
-            background-color: #4e73df;
+            background-color: #000;
             color: #fff;
-            border-color: #4e73df;
+            border-color: #000;
         }
         .table-responsive::-webkit-scrollbar {
             display: none;
+        }
+        .bg-gradient-primary{
+            background-color: #000;
+            background-image: linear-gradient(180deg,#000 10%,#000 100%) !important;
+        }
+
+        .btn-primary {
+            color: #fff !important;
+            background-color: #000 !important;
+            border-color: #000 !important;
+        }
+
+        .text-primary {
+            color: #000!important;
+        }
+
+        .border-left-primary {
+            border-left: 0.25rem solid #ff1600!important;
+        }
+        .text-custom{
+            color: #ff1600!important;
+        }
+        .table-responsive {
+            overflow-x: initial !important;
         }
     </style>
 
@@ -171,7 +195,7 @@
                     <i class="fas fa-fw fa-file"></i>
                     <span>Projects</span></a>
             </li>
-            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'bid' || @if( Route::getCurrentRoute()->getName() == 'invite') active @endif">
+            <li class="nav-item @if( Route::getCurrentRoute()->getName() == 'bid' ||  Route::getCurrentRoute()->getName() == 'invite') active @endif">
                 <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseTwo"
                     aria-expanded="true" aria-controls="collapseTwo">
                     <i class="fas fa-fw fa-percent"></i>

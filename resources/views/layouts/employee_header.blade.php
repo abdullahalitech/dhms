@@ -30,7 +30,7 @@
     <link href="{{url('template/css/datepicker/datepicker-bulma.min.css')}}" rel="stylesheet" />
     <!-- For Foundation -->
     <link href="{{url('template/css/datepicker/datepicker-foundation.min.css')}}" rel="stylesheet" />
-
+    <link rel="icon" type="image/x-icon" href="{{url('images/favicon.png')}}" sizes="32x32" />
     <style>
         .w-150{
             width:150px!important;
@@ -115,19 +115,45 @@
         }
 
         .paginate_button:hover {
-            background-color: #24b3fd;
+            background-color: #000;
             color: #fff;
-            border-color: #24b3fd;
+            border-color: #000;
         }
 
         .current {
-            background-color: #24b3fd;
+            background-color: #000;
             color: #fff;
-            border-color: #24b3fd;
+            border-color: #000;
         }
 
         .table-responsive::-webkit-scrollbar {
             display: none;
+        }
+
+        .bg-primary{
+            background-color: #000 !important;
+        }
+
+        .btn-primary {
+            color: #fff !important;
+            background-color: #000 !important;
+            border-color: #000 !important;
+        }
+
+        .text-primary {
+            color: #000!important;
+        }
+
+        .border-left-primary {
+            border-left: 0.25rem solid #ff1600!important;
+        }
+
+        .text-custom{
+            color: #ff1600!important;
+        }
+
+        .table-responsive {
+            overflow-x: initial in !important;
         }
 
     </style>

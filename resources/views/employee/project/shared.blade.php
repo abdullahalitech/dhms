@@ -3,14 +3,15 @@
 .codex-editor.codex-editor--narrow::-webkit-scrollbar {
     display: none;
 }
+#month-select, #platform-select, #type-select, #status-select{
+    height: 1.5rem !important;
+    font-size:0.9rem !important;
+    padding: 0px 4px
+}
 </style>
         <!-- Begin Page Content -->
         <div class="container-fluid">
             <!-- Content Row -->
-            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                <h1 class="h3 mb-0 text-gray-800">{{$title}}</h1>
-                
-            </div>
             <div class="row">
 
                 <div class="col-12">
@@ -18,18 +19,39 @@
                         
                         <div class="card-body">
                             <div class="row mb-3">
-                                <div class="col-12 col-md-10">
-                                    
-                                </div>
-                                <div class="col-12 col-md-2 mb-2">
-                                    <div class="text-end">
-                                        <select id="platform-select" name="platform-select" class="platform-select form-select form-control">
-                                            <option value="" selected="">Select Platform</option>
-                                            <option value="1" >Fiver</option>
-                                            <option value="2">Upwork</option>
-                                            <option value="3">Direct</option>
-                                            <option value="4">CV Marketing</option>
-                                        </select>
+                                <div class="col-12 col-md-12">
+                                    <div class="d-flex justify-content-end align-items-center">
+                                        <div class="text-end mx-2">
+                                            <select id="status-select" name="status-select" class="status-select form-select form-control">
+                                                <option value='' selected="">Status</option>
+                                                <option value='1'>In progress</option>
+                                                <option value='3'>Completed</option>
+                                            </select>
+                                        </div>
+                                        <div class="text-end mx-2">
+                                            <select id="type-select" name="type-select" class="type-select form-select form-control">
+                                                <option value='' selected="">Type</option>
+                                                <option value='1'>Bid</option>
+                                                <option value='2'>Invite</option>
+                                            </select>
+                                        </div>
+                                        <div class="text-end mx-2">
+                                            <select id="month-select" name="month-select" class="month-select form-select form-control">
+                                                <option value='{{date("M Y")}}' selected="">{{date("M Y")}}</option>
+                                                <option value="{{date('M Y',strtotime('-1 months'))}}" >{{date("M Y",strtotime('-1 months'))}}</option>
+                                                <option value="{{date('M Y',strtotime('-2 months'))}}" >{{date("M Y",strtotime('-2 months'))}}</option>
+                                                <option value="{{date('M Y',strtotime('-3 months'))}}" >{{date("M Y",strtotime('-3 months'))}}</option>
+                                            </select>
+                                        </div>
+                                        <!-- <div class="text-end mx-2">
+                                            <select id="platform-select" name="platform-select" class="platform-select form-select form-control">
+                                                <option value="" selected="">Platform</option>
+                                                <option value="1" >Fiver</option>
+                                                <option value="2">Upwork</option>
+                                                <option value="3">Direct</option>
+                                                <option value="4">CV Marketing</option>
+                                            </select>
+                                        </div> -->
                                     </div>
                                 </div>
                             </div>
@@ -58,166 +80,200 @@
             <!-- End of Main Content -->
 
            
-    
+    <!-- Add Modal-->
+    <div class="modal fade" id="AddModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add Project</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="step1" class="step1" novalidate data-parsley-validate>
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="error text-danger text-sm"></p>
+                            </div> 
+                            
+                            <div class="col-12 col-md-12  mb-2">
+                                <label for="title" class="fs-6 text-secondary">Title</label>
+                                <input type="text" name="title"  class="title form-control" required="" data-parsley-group="block-1">
+                            </div>
+                            <div class="col-12 col-md-12  mb-2">
+                                <label for="project_link" class="fs-6 text-secondary">Project Link</label>
+                                <input type="url" name="project_link"  class="project_link form-control" required="" data-parsley-group="block-1" data-parsley-type="url">
+                            </div>
+                            <div class="col-12 col-md-4  mb-2">
+                                <label for="project_type" class="fs-6 text-secondary">Project Type</label>
+                                <select id="project_type" name="project_type" class="project_type form-select form-control" required="" data-parsley-group="block-1">
+                                    <option value="1" selected="">Bid</option>
+                                    <option value="2">Invite</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4  mb-2">
+                                <label for="client_name" class="fs-6 text-secondary">Client Name</label>
+                                <input type="text" name="client_name"  class="client_name form-control" required="" data-parsley-group="block-1">
+                            </div>
+                            <div class="col-12 col-md-4  mb-2">
+                                <label for="client_type" class="fs-6 text-secondary">Client Type</label>
+                                <select id="client_type" name="client_type" class="client_type form-select form-control" required="" data-parsley-group="block-1">
+                                    <option value="1" selected="">New</option>
+                                    <option value="2">Old</option>
+                                </select>
+                            </div>
+                            <div class="col-12 col-md-4  mb-2">
+                                <label for="amount" class="fs-6 text-secondary">Total Amount</label>
+                                <input type="text" name="amount"  class="amount form-control" required="" data-parsley-group="block-1" data-parsley-type="number">
+                            </div>
+                            <div class="col-12 col-md-4 mb-2">
+                                <label for="platform" class="fs-6 text-secondary">Source</label>
+                                <select id="platform" name="platform" class="platform form-select form-control" required="" data-parsley-group="block-1">
+                                    <option value="" selected="">Select</option>
+                                    @foreach($platform as $p)
+                                        <option data-com="{{$p->commission}}" value="{{$p->id}}" >{{$p->name}}
+                                        @if($p->type == 1)
+                                            (Fiver)
+                                        @elseif($p->type == 2)
+                                            (Upwork)
+                                        @elseif($p->type == 3)
+                                            (Direct)
+                                        @else
+                                            (CV Marketing)
+                                        @endif
+
+
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- <div class="col-12 col-md-4 mb-2">
+                                <label for="platform" class="fs-6 text-secondary">Assign</label>
+                                <select id="bd" name="bd" class="bd form-select form-control" required="" data-parsley-group="block-1">
+                                    <option value="" selected="">Select</option>
+                                    @foreach($bd as $b)
+                                        <option value="{{$b->id}}" >{{$b->name}}
+                                        
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div> -->
+
+                            <!-- <div class="col-12 col-md-12  mb-2">
+                                <label for="client_name" class="fs-6 text-secondary">discription</label>
+                                <div id="editorjs" class="border rounded"></div>
+                            </div> -->
+                            <div class="col-12 text-end">
+                                <button type="button" id="submit-btn" class="btn btn-primary btn-sm px-4 mt-2 float-right">Create</button>
+                            </div>
+                        </div>
+                    </form>
+                    <form id="step2" class="step2 d-none" novalidate data-parsley-validate>
+                        <div class="row my-4">
+                            <div class="col-6 text-center border-bottom border-dark border-2">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <i class="fas fa-fw fa-file text-dark mx-1"></i>
+                                    <h6 class="text-dark mb-0">Project</h6>
+                                </div>
+                            </div>
+                            <div class="col-6 text-center border-bottom border-primary">
+                                <div class="d-flex justify-content-center align-items-center mb-3">
+                                    <i class="fas fa-fw fa-check text-primary mx-1"></i>
+                                    <h6 class="text-primary mb-0">Confirmation</h6>
+                                </div>
+                            </div>
+                           
+                        </div>
+                        <div class="row">
+                            <div class="col-12 col-md-6  mb-2">
+                                <label for="revenue" class="fs-6 text-secondary">Revenue</label>
+                                <input type="text" name="revenue"  class="revenue form-control" required="" data-parsley-group="block-2" data-parsley-type="number" disabled>
+                            </div>
+                            <div class="col-12 col-md-6  mb-2">
+                                <label for="commission" class="fs-6 text-secondary">Commission</label>
+                                <input type="text" name="commission"  class="commission form-control" required="" data-parsley-group="block-2" data-parsley-type="number" disabled>
+                            </div>
+                            
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Modal-->
+    <div class="modal fade" id="userEditModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Edit Employee</h5>
+                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <form id="edit-form-employee" class="edit-form-employee" novalidate data-parsley-validate>
+                    <div class="modal-body"> 
+                        <div class="row">
+                            
+                            <div class="col-12 col-md-12  mb-2">
+                                <label for="eName" class="fs-6 text-secondary">Name</label>
+                                <input type="text" name="eName"  class="editName form-control" required="" data-parsley-group="block-2">
+                            </div>
+                            <div class="col-12 col-md-12 mb-2">
+                                <label for="editPassword" class="fs-6 text-secondary">Password</label>
+                                <input type="editPassword" name="editPassword" class="editPassword form-control">
+                            </div>
+                            <div class="col-12 col-md-12 mb-2">
+                                <label for="editPhone" class="fs-6 text-secondary">Phone</label>
+                                <input type="tel" name="editPhone" class="editPhone form-control" required="" data-parsley-group="block-2">
+                            </div>
+                            <div class="col-12 col-md-12 mb-2">
+                                <label for="editDepartment" class="fs-6 text-secondary">Department</label>
+                                <select id="editDepartment" name="editDepartment" class="editDepartment form-select form-control" required="" data-parsley-group="block-2">
+                                <option value="">Select</option>
+                                <option value="2" >Business Developer</option>
+                                <option value="3">Developer</option>
+                                <option value="4">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="m">
+                        <button class="btn btn-secondary btn-sm" type="button">Cancel</button>
+                        <button type="button" class="btn btn-primary update-user btn-sm">Update</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- suspend modal -->
+    <div class="modal fade" id="suspendUserModal" tabindex="-1" role="dialog" aria-labelledby="suspendUserModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Suspend User</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-danger">User access will be blocked from all features of this system are you sure to suspend this user?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="final-suspend-user">Yes</button>
+                </div>
+            </div>
+        </div>
+    </div> 
     @include('layouts.employee_footer')
     <script>
-        $(document).ready(function() {
-            // $('#platform').select2({
-            //     dropdownParent: $('#AddModal')
-            // });
-        });
-    /**
-     * To initialize the Editor, create a new instance with configuration object
-     * @see docs/installation.md for mode details
-     */
-    var editor = new EditorJS({
-      /**
-       * Enable/Disable the read only mode
-       */
-      readOnly: false,
-
-      /**
-       * Wrapper of Editor
-       */
-      holder: 'editorjs',
-
-      /**
-       * Common Inline Toolbar settings
-       * - if true (or not specified), the order from 'tool' property will be used
-       * - if an array of tool names, this order will be used
-       */
-      // inlineToolbar: ['link', 'marker', 'bold', 'italic'],
-      // inlineToolbar: true,
-
-      /**
-       * Tools list
-       */
-      tools: {
-        /**
-         * Each Tool is a Plugin. Pass them via 'class' option with necessary settings {@link docs/tools.md}
-         */
-        header: {
-          class: Header,
-          inlineToolbar: ['marker', 'link'],
-          config: {
-            placeholder: 'Header'
-          },
-          shortcut: 'CMD+SHIFT+H'
-        },
-
-        /**
-         * Or pass class directly without any configuration
-         */
-        image: SimpleImage,
-
-        list: {
-          class: List,
-          inlineToolbar: true,
-          shortcut: 'CMD+SHIFT+L'
-        },
-
-        checklist: {
-          class: Checklist,
-          inlineToolbar: true,
-        },
-
-        quote: {
-          class: Quote,
-          inlineToolbar: true,
-          config: {
-            quotePlaceholder: 'Enter a quote',
-            captionPlaceholder: 'Quote\'s author',
-          },
-          shortcut: 'CMD+SHIFT+O'
-        },
-
-        warning: Warning,
-
-        marker: {
-          class:  Marker,
-          shortcut: 'CMD+SHIFT+M'
-        },
-
-        code: {
-          class:  CodeTool,
-          shortcut: 'CMD+SHIFT+C'
-        },
-
-        delimiter: Delimiter,
-
-        inlineCode: {
-          class: InlineCode,
-          shortcut: 'CMD+SHIFT+C'
-        },
-
-        linkTool: LinkTool,
-
-        embed: Embed,
-
-        table: {
-          class: Table,
-          inlineToolbar: true,
-          shortcut: 'CMD+ALT+T'
-        },
-
-      },
-
-      /**
-       * This Tool will be used as default
-       */
-      // defaultBlock: 'paragraph',
-
-      /**
-       * Initial Editor data
-       */
-      data: {
-        blocks: [
-          
-        ]
-      },
-      onReady: function(){
-        //saveButton.click();
-      },
-      onChange: function(api, event) {
-        console.log('something changed', event);
-      }
-    });
-
-    // /**
-    //  * Saving button
-    //  */
-    // const saveButton = document.getElementById('saveButton');
-
-    // /**
-    //  * Toggle read-only button
-    //  */
-    // const toggleReadOnlyButton = document.getElementById('toggleReadOnlyButton');
-    // const readOnlyIndicator = document.getElementById('readonly-state');
-
-    // /**
-    //  * Saving example
-    //  */
-    // saveButton.addEventListener('click', function () {
-    //   editor.save()
-    //     .then((savedData) => {
-    //       cPreview.show(savedData, document.getElementById("output"));
-    //     })
-    //     .catch((error) => {
-    //       console.error('Saving error', error);
-    //     });
-    // });
-
-    // /**
-    //  * Toggle read-only example
-    //  */
-    // toggleReadOnlyButton.addEventListener('click', async () => {
-    //   const readOnlyState = await editor.readOnly.toggle();
-
-    //   readOnlyIndicator.textContent = readOnlyState ? 'On' : 'Off';
-    // });
-        
-   
-    var projectTbl = '';
+     var projectTbl = '';
     $(document).ready(function(){
         toastr.options.timeOut = 1500; // 1.5s
         projectTbl = $('#project-table').dataTable({
@@ -225,7 +281,12 @@
                 url: "{{ url('user/ajax/get-project-shared') }}",
                 type: "POST",
                 data: {
-                    _token: "{{ @csrf_token() }}"
+                    _token: "{{ @csrf_token() }}",
+                    month:$('.month-select').val(),
+                    completed:0,
+                    progress:0,
+                    bid:0,
+                    invite:0
                 },
             },
             processing: true,
@@ -240,7 +301,26 @@
     })
 
     $(document).on('change','.platform-select',function(){
-        var search = $(this).val();
+       search_db();
+    })
+    $(document).on('change','.month-select',function(){
+       search_db();
+    })
+    $(document).on('change','.type-select',function(){
+       search_db();
+    })
+    $(document).on('change','.status-select',function(){
+       search_db();
+    })
+
+
+    function search_db(){
+
+        var month       = $('.month-select').val();
+        var platform    = $('.platform-select').val();
+        var type        = $('.type-select').val();
+        var status    = $('.status-select').val();
+
         $('#project-table').DataTable().destroy();
         projectTbl = $('#project-table').dataTable({
             ajax: {
@@ -248,7 +328,10 @@
                 type: "POST",
                 data: {
                     _token: "{{ @csrf_token() }}",
-                    search:search
+                    month:month,
+                    type:type,
+                    status:status
+                    
                 },
             },
             processing: true,
@@ -260,8 +343,76 @@
             bPaginate: false,
             language: { search: "", searchPlaceholder: "Search Project" }
         });  
+    }
+
+    $(document).ready(function() {
+        $('#form-employee').parsley();
+        
+    });
+ 
+    $(document).on('click', '#submit-btn', function(){
+        
+        $('#submit-btn').attr('disabled',true);
+        $('#submit-btn').text('Processing');
+        
+        var title           = $('.title').val();
+        var project_link     = $('.project_link').val();
+        var project_type     = $('.project_type').val();
+        var client_name     = $('.client_name').val();
+        var client_type     = $('.client_type').val();
+        var amount 		    = $('.amount').val();
+        var platform 	    = $('.platform').val();
+
+        $.ajax({
+            url: "{{ url('user/add-project') }}",
+            method: "POST",
+            data: { 
+                _token: "{{ @csrf_token() }}", 	
+                title 	 :title,
+                project_link 	 :project_link,
+                project_type 	 :project_type,
+                client_name    :client_name,
+                client_type    :client_type,
+                amount :amount,
+                platform:platform
+            },
+            success: function(data) {
+                var d = $.parseJSON( data );
+
+                if( d.success == 1 ) {
+                    projectTbl.api().ajax.reload();
+                    $('#userEditModal').modal('hide');
+                    toastr.success('Updated Successfuly!');
+                    $('#submit-btn').attr('disabled',false);
+                    $('#submit-btn').text('Create');
+                    $('#AddModal').modal('hide');
+                    empty_value();
+                } else {
+                    
+                    
+                    
+                }
+            }
+        });
+
     })
 
-   
+    function empty_value(){
+        $('.title').val('');
+        $('.client_email').val('');
+        $('.client_name').val('');
+        $('.amount').val('');
+        $('.platform').val('');
+        $('#platform').val('');
+        $('.amount').val('');
+        $('.revenue').attr('disabled',false);
+        $('.commission').attr('disabled', false);
+        $('.revenue').val('');
+        $('.commission').val('');
+        editor.blocks.clear();
+        $('#step1').removeClass('d-none');
+        $('#step2').addClass('d-none');
+    }
+
     
     </script>

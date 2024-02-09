@@ -32,9 +32,12 @@ Route::middleware('auth')->group(function () {
 
     //Admin Routes starts
     Route::get('admin/dashboard', [AdminController::class, 'index'])->name('adminDashboard');
+    Route::get('monthly-earning-details', [AdminController::class, 'monthly_earning'])->name('adminDashboard');
+    Route::get('alltime-earning-details', [AdminController::class, 'alltime_earning'])->name('adminDashboard');
     
     //employee routes
     Route::get('employee', [AdminController::class, 'add_employee'])->name('employee');
+    Route::get('employee/report/{id}', [AdminController::class, 'employee_report'])->name('employee');
     Route::post('add-employee', [AdminController::class, 'store_employee']);
     Route::post('ajax/get-employee', [AdminController::class, 'ajax_get_employee']);
     Route::post('ajax/admin/get-employee-for-edit', [AdminController::class, 'ajax_admin_get_employee']);
